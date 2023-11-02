@@ -84,6 +84,34 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
     return db
 
 
+def main():
+    """
+    Retrieves all rows in the 'users' table of the database and logs each row.
+
+    The log message is formatted by a RedactingFormatter to obfuscate
+      fields defined in PII_FIELDS.
+    """
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users;")
+
+    fields = ["name", "email", "phone", "ssn", "password"]
+    formatter = RedactingFormatter(fields)
+
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
+    logger.addHandler(logging.StreamHandler())
+
+    for row in cursor:
+        message = ";".join(f"{f}={v}" for f, v in zip(fields, row))
+        log_record = logging.LogRecord("user_data", logging.INFO,
+                                       None, None, message, None, None)
+        print(formatter.format(log_record))
+
+    cursor.close()
+    db.close()
+
+
 class RedactingFormatter(logging.Formatter):
     """Redacting Formatter class"""
 
