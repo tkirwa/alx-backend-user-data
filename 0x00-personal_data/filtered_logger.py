@@ -5,7 +5,8 @@ Module for handling Personal Data
 import re
 from typing import List
 import logging
-
+import os
+import mysql.connector
 
 PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 
@@ -35,9 +36,9 @@ def get_logger() -> logging.Logger:
     """
     Creates and returns a logger object with specific settings.
 
-    The logger object is named "user_data" and its level is set to INFO. 
-    Propagation is turned off to prevent the log messages from being passed 
-    to the root logger. A stream handler with a specific formatter is added 
+    The logger object is named "user_data" and its level is set to INFO.
+    Propagation is turned off to prevent the log messages from being passed
+    to the root logger. A stream handler with a specific formatter is added
     to the logger. This formatter obfuscates fields defined in PII_FIELDS.
 
     Returns:
@@ -54,6 +55,35 @@ def get_logger() -> logging.Logger:
     return logger
 
 
+def get_db() -> mysql.connector.connection.MySQLConnection:
+    """
+    Establishes a connection to a MySQL database.
+
+    Uses the following environment variables for the database credentials:
+    - PERSONAL_DATA_DB_USERNAME: The username for the database
+      (default is "root").
+    - PERSONAL_DATA_DB_PASSWORD: The password for the database
+      (default is an empty string).
+    - PERSONAL_DATA_DB_HOST: The host of the database
+      (default is "localhost").
+    - PERSONAL_DATA_DB_NAME: The name of the database.
+
+    Returns:
+        A MySQLConnection object representing the established
+          database connection.
+    """
+    username = os.getenv("PERSONAL_DATA_DB_USERNAME", "root")
+    password = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
+    host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
+    db_name = os.getenv("PERSONAL_DATA_DB_NAME")
+
+    db = mysql.connector.connect(
+        user=username, password=password, host=host, database=db_name
+    )
+
+    return db
+
+
 class RedactingFormatter(logging.Formatter):
     """Redacting Formatter class"""
 
@@ -68,8 +98,7 @@ class RedactingFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """Filters values in incoming log records using filter_datum"""
         record.msg = filter_datum(
-            self.fields, self.REDACTION,
-            record.getMessage(),self.SEPARATOR
+            self.fields, self.REDACTION, record.getMessage(), self.SEPARATOR
         )
         return super(RedactingFormatter, self).format(record)
 
