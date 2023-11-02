@@ -3,6 +3,8 @@ import bcrypt
 encrypt_password.py - Encrypting passwords
 """
 
+import bcrypt
+
 
 def hash_password(password: str) -> bytes:
     """
@@ -14,7 +16,7 @@ def hash_password(password: str) -> bytes:
     Returns:
     A byte string representing the hashed password.
     """
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode(), salt)
+    encoded = password.encode()
+    hashed = bcrypt.hashpw(encoded, bcrypt.gensalt())
 
-    return hashed_password
+    return hashed
