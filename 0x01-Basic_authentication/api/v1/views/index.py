@@ -29,23 +29,17 @@ def stats() -> str:
 
 @app_views.route("/unauthorized", methods=["GET"], strict_slashes=False)
 def unauthorized() -> str:
-    """
-    By calling abort(401), the error
-    handler will be executed.
-    GET /api/v1/unauthorized
+    """GET /api/v1/unauthorized
     Return:
-      - Aborts
+      - raises a 401 error by using abort
     """
-    return abort(401, description="Unauthorised")
+    abort(401)
 
 
 @app_views.route("/forbidden", methods=["GET"], strict_slashes=False)
 def forbidden() -> str:
-    """
-    By calling abort(403), the error
-    handler will be executed.
-    GET /api/v1/forbidden
+    """GET /api/v1/forbidden
     Return:
-      - Aborts
+      - raises a 403 error by using abort
     """
-    return abort(403, description="Forbidden")
+    abort(403)
