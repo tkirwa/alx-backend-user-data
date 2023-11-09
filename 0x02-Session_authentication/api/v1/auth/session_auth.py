@@ -55,8 +55,7 @@ class SessionAuth(Auth):
         User: The User instance associated with the cookie _my_session_id.
             Returns None if the cookie or the user does not exist.
         """
-        session_id = self.session_cookie(request)
-        user_id = self.user_id_for_session_id(session_id)
+        user_id = self.user_id_for_session_id(self.session_cookie(request))
         return User.get(user_id)
 
     def destroy_session(self, request=None):
@@ -69,16 +68,10 @@ class SessionAuth(Auth):
         Returns:
         bool: True if the session was destroyed, False otherwise.
         """
-        if request is None:
-            return False
-
         session_id = self.session_cookie(request)
-        if session_id is None:
-            return False
-
         user_id = self.user_id_for_session_id(session_id)
-        if user_id is None:
+        if (request is None or session_id is None) or user_id is None:
             return False
-
-        del self.user_id_by_session_id[session_id]
+        if session_id in self.user_id_by_session_id:
+            del self.user_id_by_session_id[session_id]
         return True
