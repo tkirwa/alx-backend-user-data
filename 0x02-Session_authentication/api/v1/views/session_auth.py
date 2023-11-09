@@ -27,3 +27,21 @@ def login():
             return response
 
     return jsonify({"error": "wrong password"}), 401
+
+
+@app_views.route("/auth_session/logout", methods=["DELETE"],
+                 strict_slashes=False)
+def logout():
+    """
+    Deletes the user session / logout.
+
+    Returns:
+    dict: An empty dictionary with the status code 200 if the session
+      was destroyed.
+          Aborts with a 404 error if the session was not destroyed.
+    """
+    destroyed = auth.destroy_session(request)
+    if not destroyed:
+        abort(404)
+
+    return jsonify({}), 200
