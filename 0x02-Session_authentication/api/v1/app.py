@@ -51,35 +51,26 @@ def forbidden(error) -> str:
 
 
 @app.before_request
-def before_request_func():
+def before_request():
     """
-    A method to be executed before each request.
-
-    It checks if the path is in the list of excluded paths of the method
-      require_auth.
-    If auth.authorization_header(request) and auth.session_cookie(request)
-      return None, it aborts with a 401 error.
+    handler before_request
     """
-    if not auth.require_auth(
-        request.path,
-        [
-            "/api/v1/status/",
-            "/api/v1/unauthorized/",
-            "/api/v1/forbidden/",
-            "/api/v1/auth_session/login/",
-        ],
-    ):
-        return
+    authorized_list = [
+        "/api/v1/status/",
+        "/api/v1/unauthorized/",
+        "/api/v1/forbidden/",
+        "/api/v1/auth_session/login/",
+    ]
 
-    if (
-        auth.authorization_header(request) is None
-        and auth.session_cookie(request) is None
-    ):
-        abort(401)
-
-    request.current_user = auth.current_user(request)
-    if request.current_user is None:
-        abort(403)
+    if auth and auth.require_auth(request.path, authorized_list):
+        if not auth.authorization_header(request):
+            abort(401)
+        if auth.authorization_header(request) and not auth.session_cookie(
+                request):
+            abort(401)
+        request.current_user = auth.current_user(request)
+        if not auth.current_user(request):
+            abort(403)
 
 
 if __name__ == "__main__":
