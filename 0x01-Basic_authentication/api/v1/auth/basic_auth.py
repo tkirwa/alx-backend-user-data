@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Basic authentication module for the API.
+"""
+This module handles the basic authentication for the API.
 """
 import re
 import base64
@@ -11,12 +12,18 @@ from models.user import User
 
 
 class BasicAuth(Auth):
-    """Basic authentication class."""
+    """
+    This class manages Basic Authentication. It inherits from the Auth class.
+    """
 
     def extract_base64_authorization_header(
             self, authorization_header: str) -> str:
-        """Extracts the Base64 part of the Authorization header
-        for a Basic Authentication.
+        """
+        This method extracts the Base64 part of the Authorization header.
+        Args:
+            authorization_header (str): The Authorization header
+        Returns:
+            str: The Base64 part of the Authorization header
         """
         if type(authorization_header) == str:
             pattern = r"Basic (?P<token>.+)"
@@ -29,7 +36,14 @@ class BasicAuth(Auth):
         self,
         base64_authorization_header: str,
     ) -> str:
-        """Decodes a base64-encoded authorization header."""
+        """
+        This method decodes a base64-encoded authorization header.
+        Args:
+            base64_authorization_header (str): The Base64 part of the
+              Authorization header
+        Returns:
+            str: The decoded Base64 string
+        """
         if type(base64_authorization_header) == str:
             try:
                 res = base64.b64decode(
@@ -44,8 +58,14 @@ class BasicAuth(Auth):
         self,
         decoded_base64_authorization_header: str,
     ) -> Tuple[str, str]:
-        """Extracts user credentials from a base64-decoded authorization
-        header that uses the Basic authentication flow.
+        """
+        This method extracts user credentials from a base64-decoded
+          authorization header.
+        Args:
+            decoded_base64_authorization_header (str): The decoded
+              Base64 string
+        Returns:
+            Tuple[str, str]: The extracted username and password
         """
         if type(decoded_base64_authorization_header) == str:
             pattern = r"(?P<user>[^:]+):(?P<password>.+)"
@@ -62,7 +82,15 @@ class BasicAuth(Auth):
     def user_object_from_credentials(
         self, user_email: str, user_pwd: str
     ) -> TypeVar("User"):
-        """Retrieves a user based on the user's authentication credentials."""
+        """
+        This method retrieves a user based on the user's authentication
+          credentials.
+        Args:
+            user_email (str): The user's email
+            user_pwd (str): The user's password
+        Returns:
+            TypeVar("User"): The User object if it exists, None otherwise
+        """
         if type(user_email) == str and type(user_pwd) == str:
             try:
                 users = User.search({"email": user_email})
@@ -75,7 +103,13 @@ class BasicAuth(Auth):
         return None
 
     def current_user(self, request=None) -> TypeVar("User"):
-        """Retrieves the user from a request."""
+        """
+        This method retrieves the user from a request.
+        Args:
+            request: The Flask request object
+        Returns:
+            TypeVar('User'): The User object if it exists, None otherwise
+        """
         auth_header = self.authorization_header(request)
         b64_auth_token = self.extract_base64_authorization_header(auth_header)
         auth_token = self.decode_base64_authorization_header(b64_auth_token)
