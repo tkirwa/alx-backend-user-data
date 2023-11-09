@@ -2,6 +2,7 @@
 """
 This module handles the authentication for the API.
 """
+import os
 import re
 from typing import List, TypeVar
 
@@ -58,3 +59,19 @@ class Auth:
             TypeVar('User'): Always None in this case
         """
         return None
+
+    def session_cookie(self, request=None):
+        """
+        Returns a cookie value from a request.
+
+        Parameters:
+        request (flask.Request): The Flask request.
+
+        Returns:
+        str: The value of the cookie named _my_session_id from request.
+            Returns None if request is None.
+        """
+        if request is None:
+            return None
+        session_name = os.getenv("SESSION_NAME")
+        return request.cookies.get(session_name)
