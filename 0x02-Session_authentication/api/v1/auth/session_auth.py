@@ -4,6 +4,7 @@ This module handles all basic authentication for the API.
 """
 from api.v1.auth.auth import Auth
 import uuid
+from models.user import User
 
 
 class SessionAuth(Auth):
@@ -42,3 +43,18 @@ class SessionAuth(Auth):
         if session_id is None or type(session_id) != str:
             return None
         return self.user_id_by_session_id.get(session_id)
+
+    def current_user(self, request=None):
+        """
+        Returns a User instance based on a cookie value.
+
+        Parameters:
+        request (flask.Request): The Flask request.
+
+        Returns:
+        User: The User instance associated with the cookie _my_session_id.
+            Returns None if the cookie or the user does not exist.
+        """
+        session_id = self.session_cookie(request)
+        user_id = self.user_id_for_session_id(session_id)
+        return User.get(user_id)
