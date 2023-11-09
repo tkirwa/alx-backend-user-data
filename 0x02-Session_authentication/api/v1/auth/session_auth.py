@@ -1,77 +1,61 @@
 #!/usr/bin/env python3
+
 """
-This module handles all basic authentication for the API.
+SessionAuth module
 """
+
 from api.v1.auth.auth import Auth
-import uuid
+from typing import TypeVar
+from uuid import uuid4
 from models.user import User
 
 
 class SessionAuth(Auth):
     """
-    This class manages Session Authentication. It inherits from the Auth class.
+    SessionAuth class.
     """
-
     user_id_by_session_id = {}
 
     def create_session(self, user_id: str = None) -> str:
         """
-        This method creates a Session ID for a user_id.
-        Args:
-            user_id (str): The ID of the user
-        Returns:
-            str: The Session ID
+        create_session.
         """
-        if user_id is None or type(user_id) != str:
-            return None
-        else:
-            session_id = str(uuid.uuid4())
-            self.user_id_by_session_id[session_id] = user_id
-            return session_id
+        if not user_id or type(user_id) != str:
+            return
+        session_id = str(uuid4())
+        SessionAuth.user_id_by_session_id[session_id] = user_id
+        return session_id
 
     def user_id_for_session_id(self, session_id: str = None) -> str:
         """
-        Returns a User ID based on a Session ID.
-
-        Parameters:
-        session_id (str): The session ID.
-
-        Returns:
-        str: The User ID associated with the session ID.
-            Returns None if session_id is None or not a string.
+        user_id_for_session_id.
         """
-        if session_id is None or type(session_id) != str:
-            return None
-        return self.user_id_by_session_id.get(session_id)
+        if not session_id or type(session_id) != str:
+            return
+        return SessionAuth.user_id_by_session_id.get(session_id, None)
 
-    def current_user(self, request=None):
+    def current_user(self, request=None) -> TypeVar('User'):
         """
-        Returns a User instance based on a cookie value.
-
-        Parameters:
-        request (flask.Request): The Flask request.
-
-        Returns:
-        User: The User instance associated with the cookie _my_session_id.
-            Returns None if the cookie or the user does not exist.
+        current_user.
         """
-        user_id = self.user_id_for_session_id(self.session_cookie(request))
-        return User.get(user_id)
+        if request:
+            session_cookie = self.session_cookie(request)
+            if session_cookie:
+                user_id = self.user_id_for_session_id(session_cookie)
+                return User.get(user_id)
 
-    def destroy_session(self, request=None):
+    def destroy_session(self, request=None) -> bool:
         """
-        Deletes the user session / logout.
-
-        Parameters:
-        request (flask.Request): The Flask request.
-
-        Returns:
-        bool: True if the session was destroyed, False otherwise.
+        destroy_session.
         """
-        session_id = self.session_cookie(request)
-        user_id = self.user_id_for_session_id(session_id)
-        if (request is None or session_id is None) or user_id is None:
+        if not request:
             return False
-        if session_id in self.user_id_by_session_id:
-            del self.user_id_by_session_id[session_id]
+        session_cookie = self.session_cookie(request)
+        if not session_cookie:
+            return False
+        user_id = self.user_id_for_session_id(session_cookie)
+        if not user_id:
+            return False
+        self.user_id_by_session_id.pop(session_cookie, None)
         return True
+    
