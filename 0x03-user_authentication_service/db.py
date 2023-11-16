@@ -78,3 +78,22 @@ class DB:
             return session.query(User).filter_by(**kwargs).one()
         except Exception as exc:
             raise NoResultFound from exc
+
+    def update_user(self, user_id: int, **kwargs) -> None:
+        """
+        Update a user's fields in the database.
+
+        Parameters:
+        user_id (int): The id of the user to be updated.
+        **kwargs: Variable length keyword arguments used for updating the user's fields.
+
+        Raises:
+        ValueError: If invalid fields are provided.
+        """
+        session = self._session
+        user = self.find_user_by(id=user_id)
+        for k, v in kwargs.items():
+            if k not in VALID_FIELDS:
+                raise ValueError
+            setattr(user, k, v)
+        session.commit()
