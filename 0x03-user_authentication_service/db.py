@@ -55,3 +55,26 @@ class DB:
         session.add(user)
         session.commit()
         return user
+
+    def find_user_by(self, **kwargs) -> User:
+        """
+        Find a user in the database by using keyword arguments.
+
+        Parameters:
+        **kwargs: Variable length keyword arguments used for searching
+          the user.
+
+        Returns:
+        User: The user object if found.
+
+        Raises:
+        InvalidRequestError: If no arguments or invalid fields are provided.
+        NoResultFound: If no user is found.
+        """
+        if not kwargs or any(x not in VALID_FIELDS for x in kwargs):
+            raise InvalidRequestError
+        session = self._session
+        try:
+            return session.query(User).filter_by(**kwargs).one()
+        except Exception as exc:
+            raise NoResultFound from exc
