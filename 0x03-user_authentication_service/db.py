@@ -39,7 +39,14 @@ class DB:
 
     def add_user(self, email: str, hashed_password: str) -> User:
         """
-        add_user.
+        Add a user instance to the session DB
+
+        Parameters:
+        email (str): The email of the user to be added.
+        hashed_password (str): The hashed password of the user to be added.
+
+        Returns:
+        User: The added user object.
         """
         if not email or not hashed_password:
             return
