@@ -85,7 +85,8 @@ class DB:
 
         Parameters:
         user_id (int): The id of the user to be updated.
-        **kwargs: Variable length keyword arguments used for updating the user's fields.
+        **kwargs: Variable length keyword arguments used for updating
+          the user's fields.
 
         Raises:
         ValueError: If invalid fields are provided.
